@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lunix / docs / architecture</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="top">
+    <a href="../index.html">home</a>
+    <a href="index.html">docs</a>
+    <a href="https://github.com/YOURNAME/lunix">github</a>
+  </nav>
+
+  <p class="tagline"><a href="index.html">docs</a> / architecture</p>
+
+  <section>
+    <h1>architecture</h1>
+
+    <h3>boot sequence</h3>
+    <pre class="block">firmware / bootloader (grub, not mine)
+    |
+    v
+linux kernel boots, mounts initramfs
+    |
+    v
+lunix-boot runs as pid 1
+    - mounts /proc /sys /dev
+    - minimal setup if anything else is needed
+    |
+    v
+lunix-core starts, owns the terminal
+    - scans modules per the module contract
+    - draws the menu
+    |
+    v
+pick a module, fork/exec, it runs, it exits, back to menu</pre>
+    <p>no display manager, no desktop session, no login stack handed down from somewhere else.</p>
+
+    <h3>why pid 1 and not just an app</h3>
+    <p>
+      running lunix-core as a normal app inside a regular desktop
+      would work fine technically, and it would miss the point. the
+      thing that matters is there's nothing else underneath, no
+      fallback desktop to escape to. pid 1 is the closest userspace
+      can get to that without writing a kernel. it comes with real
+      responsibility, reaping zombies, handling shutdown correctly,
+      and that's part of why it's worth doing properly.
+    </p>
+
+    <h3>two binaries</h3>
+    <p>
+      <code>boot/</code> is the init. small on purpose. gets the
+      machine to a state where core can run, then gets out of the
+      way. this is not where interesting things happen, it's
+      plumbing, keep it short and correct.
+    </p>
+    <p>
+      <code>core/</code> is the launcher. reads the module contract,
+      draws the menu, launches modules, reaps them, redraws. this is
+      where the actual feel of the system lives.
+    </p>
+    <p>kept separate so boot can be hardened once and left alone while core keeps changing.</p>
+
+    <h3>development loop</h3>
+    <p>don't boot this on real hardware until it's proven elsewhere first.</p>
+    <ol>
+      <li>build boot + core</li>
+      <li>boot in qemu with a custom initramfs, fast iteration, no risk</li>
+      <li>once stable, test on a spare partition</li>
+      <li>only then does it become something to boot daily</li>
+    </ol>
+    <p>qemu is a tool here, not the destination.</p>
+
+    <h3>where modules fit</h3>
+    <p>
+      modules don't need to know any of this. plain executables, read
+      argv, do the thing, exit with a code. a module tested by
+      running it in a normal terminal behaves the same when launched
+      by core at boot. see <a href="module-contract.html">module contract</a>.
+    </p>
+  </section>
+
+  <footer>
+    <span>MIT licensed. built alone, in the open.</span>
+    <span><a href="https://github.com/YOURNAME/lunix">source</a></span>
+  </footer>
+
+</div>
+</body>
+</html>

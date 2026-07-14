@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lunix / docs</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <pre class="logo"> _              _
+| |_   _ _ __  (_)_  __
+| | | | | '_ \ | \ \/ /
+| | |_| | | | || |>  &lt;
+|_|\__,_|_| |_|/_/_/\_\</pre>
+  <p class="tagline">docs</p>
+
+  <nav class="top">
+    <a href="../index.html">home</a>
+    <a href="index.html" class="current">docs</a>
+    <a href="https://github.com/YOURNAME/lunix">github</a>
+  </nav>
+
+  <section>
+    <h1>docs</h1>
+    <p>
+      technical reference for how the pieces fit together. this grows
+      as the ecosystem grows &mdash; module category docs get added here
+      once there's a module worth documenting.
+    </p>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2>core</h2>
+    <ul class="doclist">
+      <li>
+        <a href="architecture.html">architecture</a>
+        <div class="desc">boot sequence, pid 1, why two binaries instead of one</div>
+      </li>
+      <li>
+        <a href="module-contract.html">module contract</a>
+        <div class="desc">what a module is, the manifest format, discovery, launch, exit codes</div>
+      </li>
+      <li>
+        <a href="languages.html">languages</a>
+        <div class="desc">what gets written in what, and why</div>
+      </li>
+    </ul>
+  </section>
+
+  <hr class="rule">
+
+  <section id="status">
+    <h2>status</h2>
+    <p>
+      see <a href="https://github.com/YOURNAME/lunix/blob/main/STATUS.md">STATUS.md</a>
+      in the repo for the current build state.
+    </p>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2>modules</h2>
+    <p>nothing shipped yet. once a module lands, its docs get a page here, grouped by category:</p>
+    <ul class="doclist">
+      <li><span class="label">networking</span><div class="desc">not started</div></li>
+      <li><span class="label">graphics</span><div class="desc">not started</div></li>
+      <li><span class="label">audio</span><div class="desc">not started</div></li>
+      <li><span class="label">tools</span><div class="desc">not started</div></li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>MIT licensed. built alone, in the open.</span>
+    <span><a href="https://github.com/YOURNAME/lunix">source</a></span>
+  </footer>
+
+</div>
+</body>
+</html>

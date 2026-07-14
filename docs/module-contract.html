@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lunix / docs / module contract</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="top">
+    <a href="../index.html">home</a>
+    <a href="index.html">docs</a>
+    <a href="https://github.com/YOURNAME/lunix">github</a>
+  </nav>
+
+  <p class="tagline"><a href="index.html">docs</a> / module contract <span style="color:var(--fg-dim)">&middot; v0.1 draft</span></p>
+
+  <section>
+    <h1>module contract</h1>
+    <p>
+      written before any module exists. the rules of the world &mdash;
+      everything built after has to fit inside this, not the other
+      way around.
+    </p>
+
+    <h3>what a module is</h3>
+    <ol>
+      <li>a single executable binary</li>
+      <li>a manifest file next to it</li>
+      <li>nothing else required &mdash; no shared libs, no dependency on core's internals. delete core entirely and every module still runs from a terminal on its own.</li>
+    </ol>
+
+    <h3>the manifest</h3>
+    <p>every module ships a <code>lunix.toml</code> next to its binary:</p>
+    <pre class="block">[module]
+name = "lunix-scope"
+version = "0.1.0"
+summary = "process and memory inspector"
+binary = "lunix-scope"
+icon = "scope"
+category = "tools"
+
+[module.launch]
+mode = "foreground"
+args = []</pre>
+    <p>
+      category is for menu grouping only, matches the modules/ folder
+      names (networking, graphics, audio, tools). unrecognized
+      categories fall under tools until core knows about them &mdash;
+      adding a category never breaks an old manifest.
+    </p>
+
+    <h3>discovery</h3>
+    <p>core scans <code>~/.lunix/modules/</code> at startup, one directory per module:</p>
+    <pre class="block">~/.lunix/modules/&lt;name&gt;/
+    lunix.toml
+    &lt;binary&gt;</pre>
+    <p>no registry, no network call. add a module by dropping a directory in.</p>
+
+    <h3>launching</h3>
+    <p><strong>foreground</strong> &mdash; core hands off the terminal, fork, exec, wait. module exits, core redraws. default, covers almost everything.</p>
+    <p><strong>detached</strong> &mdash; fork, exec, don't wait. defined now, not implemented yet, so the manifest format doesn't need to change later when something needs it.</p>
+    <p>no ipc, no plugin api in v0.1. core starts a process and gets out of the way. anything fancier is a deliberate later decision.</p>
+
+    <h3>exit contract</h3>
+    <p>exit 0, clean, back to menu. anything else, core shows the code and waits for a keypress instead of silently redrawing. failures stay visible.</p>
+
+    <h3>changelog</h3>
+    <p><strong>v0.1</strong> &mdash; single binary modules, toml manifest, directory scan discovery, foreground/detached modes, exit code error signaling.</p>
+  </section>
+
+  <footer>
+    <span>MIT licensed. built alone, in the open.</span>
+    <span><a href="https://github.com/YOURNAME/lunix">source</a></span>
+  </footer>
+
+</div>
+</body>
+</html>

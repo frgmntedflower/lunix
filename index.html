@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lunix</title>
+<meta name="description" content="custom linux userspace. own init, own launcher, own tools.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div id="boot" aria-hidden="true"></div>
+
+  <div id="content" class="hidden">
+
+    <pre class="logo"> _              _
+| |_   _ _ __  (_)_  __
+| | | | | '_ \ | \ \/ /
+| | |_| | | | || |>  &lt;
+|_|\__,_|_| |_|/_/_/\_\</pre>
+    <p class="tagline">custom linux userspace. own init, own launcher, own tools.</p>
+
+    <nav class="top">
+      <a href="index.html" class="current">home</a>
+      <a href="docs/index.html">docs</a>
+      <a href="docs/index.html#status">status</a>
+      <a href="https://github.com/YOURNAME/lunix">github</a>
+    </nav>
+
+    <section id="what">
+      <h1>what this is</h1>
+      <p>
+        lunix replaces systemd and the usual desktop stack with something
+        i built and understand end to end. kernel boots, my init runs as
+        pid 1, mounts what needs mounting, hands off to my launcher. no
+        login manager, no desktop environment, no service manager doing
+        fifty things i never asked for.
+      </p>
+      <p>
+        on top of that sits everything else: tools, modules, whatever
+        gets built next. each one does one thing. each one works
+        standalone if you pull it out and run it somewhere else. none of
+        it is required to make the next piece work.
+      </p>
+      <p>
+        base system is debian 12. not exciting, just stable and out of
+        the way. the kernel and base tools come from there, everything
+        above pid 1 is mine.
+      </p>
+      <p>
+        right now this is 64 bit userspace on the stock linux kernel.
+        a kernel of its own is on the list, a long way off, and nothing
+        here depends on that ever happening.
+      </p>
+    </section>
+
+    <hr class="rule">
+
+    <section id="philosophy">
+      <h2>philosophy</h2>
+      <div class="comment">
+        <p>software today ships bloated by default.</p>
+        <p>every tool wants a plugin system before it does the one thing it was built for.</p>
+        <p>i'd rather write less and understand all of it.</p>
+        <p>small tools, sharp edges, no dependency i didn't choose myself.</p>
+        <p>build it small, get it working, use it daily, add the next piece when there's an actual reason to.</p>
+        <p>that's the whole method. no roadmap slides, no grand unveiling.</p>
+        <p>just one working thing after another.</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <section id="layout">
+      <h2>layout</h2>
+      <pre class="block">lunix/
+    boot/               pid 1, mounts what's needed, hands off to core
+    core/               reads modules, shows a menu, runs what you pick
+    modules/
+        networking/     network tools and modules
+        graphics/       rendering, display, anything visual
+        audio/          sound
+        tools/          everything else, RE tools, utilities, etc
+    docs/               architecture and module contract, technical only</pre>
+      <p>
+        each module category holds submodules, added one at a time as
+        they get built. each module is its own repo with its own
+        readme. this page doesn't explain them, it just says where
+        they live &mdash; see <a href="docs/index.html">docs</a>.
+      </p>
+    </section>
+
+    <hr class="rule">
+
+    <section id="languages">
+      <h2>languages</h2>
+      <ul>
+        <li><strong>boot + core</strong> &mdash; rust. pid 1 is the one place a bug takes the whole machine down with it.</li>
+        <li><strong>modules, default</strong> &mdash; c. matches dwm, st, dmenu, the kernel itself.</li>
+        <li><strong>networking / security modules</strong> &mdash; go. static binaries, fast to ship.</li>
+        <li><strong>asm</strong> &mdash; inside a module, never as a whole module.</li>
+      </ul>
+      <p>full reasoning in <a href="docs/languages.html">docs/languages</a>.</p>
+    </section>
+
+    <hr class="rule">
+
+    <section id="status">
+      <h2>status</h2>
+      <ul class="checklist">
+        <li class="done"><span class="box">[x]</span><span class="label">module contract written</span></li>
+        <li class="done"><span class="box">[x]</span><span class="label">repo structure in place</span></li>
+        <li class="done"><span class="box">[x]</span><span class="label">core: manifest parsing, discovery, launch</span></li>
+        <li class="todo"><span class="box">[ ]</span><span class="label">boot: mounts /proc /sys /dev</span></li>
+        <li class="todo"><span class="box">[ ]</span><span class="label">boot: execs core, reaps on exit</span></li>
+        <li class="todo"><span class="box">[ ]</span><span class="label">boots in qemu</span></li>
+        <li class="todo"><span class="box">[ ]</span><span class="label">first real module shipped</span></li>
+      </ul>
+      <p>full list in the repo's <a href="https://github.com/YOURNAME/lunix/blob/main/STATUS.md">STATUS.md</a>. checked box means it runs, not that it's planned.</p>
+    </section>
+
+    <footer>
+      <span>MIT licensed. built alone, in the open.</span>
+      <span><a href="https://github.com/YOURNAME/lunix">source</a></span>
+    </footer>
+
+  </div>
+</div>
+<script src="boot.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lunix / docs / languages</title>
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="top">
+    <a href="../index.html">home</a>
+    <a href="index.html">docs</a>
+    <a href="https://github.com/YOURNAME/lunix">github</a>
+  </nav>
+
+  <p class="tagline"><a href="index.html">docs</a> / languages</p>
+
+  <section>
+    <h1>languages</h1>
+    <p>decided once here so it doesn't get relitigated every module.</p>
+
+    <h3>boot + core: rust</h3>
+    <p>
+      pid 1 is the one place a bug takes the whole machine down with
+      it. memory safety matters more here than anywhere else, and
+      rust gives that without a garbage collector, so it's still a
+      real fit for init and launcher work.
+    </p>
+
+    <h3>modules, default: c</h3>
+    <p>
+      matches dwm, st, dmenu, the kernel itself, every real init that
+      came before this one. text editor, RE tool, anything that
+      should feel at home next to suckless tools, it's c unless
+      there's a specific reason otherwise.
+    </p>
+
+    <h3>networking / security modules: go</h3>
+    <p>
+      wrong fit for boot, wrong fit for most modules, right fit here.
+      static binaries, fast to write, easy to ship and cross compile.
+    </p>
+
+    <h3>asm</h3>
+    <p>
+      inside modules, never as a whole module. hot loop in a
+      renderer, a perf critical path. spice, not the meal.
+    </p>
+
+    <h3>the manifest doesn't care</h3>
+    <p>
+      <code>lunix.toml</code> just points at an executable. this page
+      is a style decision for consistency, not something enforced in
+      code.
+    </p>
+  </section>
+
+  <footer>
+    <span>MIT licensed. built alone, in the open.</span>
+    <span><a href="https://github.com/YOURNAME/lunix">source</a></span>
+  </footer>
+
+</div>
+</body>
+</html>
