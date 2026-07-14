@@ -1,27 +1,35 @@
-//! lunix-boot — PID 1.
+//! lunix-boot — pid 1.
 //!
-//! Job, in order:
+//! job, in order:
 //!   1. mount essential filesystems
 //!   2. do whatever minimal hardware/network bring-up is required
 //!   3. exec into lunix-core, handing off the terminal
 //!   4. if lunix-core ever exits, reap zombies and decide what happens next
 //!      (v0.1: just restart it — you're never dumped at a dead prompt)
 //!
-//! This file stays small on purpose. Every line here runs before anything
-//! else on the machine can. Boring and correct beats clever every time.
+//! this file stays small on purpose. every line here runs before anything
+//! else on the machine can. boring and correct beats clever every time.
+
+use std::process::exit;
+
+use nix::{
+    libc::{perror, EXIT_FAILURE, SIGCHLD, SIG_ERR, SIG_IGN},
+    mount::{mount, MsFlags},
+    sys::signal::signal,
+};
 
 fn main() {
     println!("lunix-boot: starting as pid {}", std::process::id());
 
     // step 1: mount essential filesystems.
-    // TODO: mount /proc, /sys, /dev via nix::mount before anything else
-    // touches the filesystem. Without /proc in particular, most tools
+    // todo: mount /proc, /sys, /dev via nix::mount before anything else
+    // touches the filesystem. without /proc in particular, most tools
     // (including lunix-core's own module discovery later) won't work.
     mount_essential_filesystems();
 
     // step 2: minimal bring-up.
-    // TODO: whatever's needed before core can run — likely nothing at
-    // first. Resist adding things here "just in case." If lunix-core
+    // todo: whatever's needed before core can run — likely nothing at
+    // first. resist adding things here "just in case." if lunix-core
     // needs it, lunix-core should own bringing it up, not init.
 
     // step 3: hand off to lunix-core.
@@ -30,18 +38,70 @@ fn main() {
 }
 
 fn mount_essential_filesystems() {
-    // TODO: implement with nix::mount::mount()
-    // - proc  -> /proc
-    // - sysfs -> /sys
-    // - devtmpfs -> /dev
-    println!("lunix-boot: TODO mount /proc /sys /dev");
+    let result_proc = mount(
+        Some("proc"),
+        "/proc",
+        Some("proc"),
+        MsFlags::empty(),
+        None::<&str>,
+    );
+
+    match result_proc {
+        Ok(()) => println!("lunix-boot: mount /proc ... ok"),
+        Err(e) => eprintln!("lunix-boot: mount /proc failed: {e}"),
+    }
+
+    let result_sys = mount(
+        Some("sys"),
+        "/sys",
+        Some("sys"),
+        MsFlags::empty(),
+        None::<&str>,
+    );
+
+    match result_sys {
+        Ok(()) => println!("lunix-boot: mount /sys ... ok"),
+        Err(e) => eprintln!("lunix-boot: mount /sys failed: {e}"),
+    }
+
+    let result_dev = mount(
+        Some("dev"),
+        "/dev",
+        Some("dev"),
+        MsFlags::empty(),
+        None::<&str>,
+    );
+
+    match result_dev {
+        Ok(()) => println!("lunix-boot: mount /dev ... ok"),
+        Err(e) => eprintln!("lunix-boot: mount /dev failed: {e}"),
+    }
+
+    let result_tmp = mount(
+        Some("tmp"),
+        "/tmp",
+        Some("tmp"),
+        MsFlags::empty(),
+        None::<&str>,
+    );
+
+    match result_tmp {
+        Ok(()) => println!("lunix-boot: mount /tmp ... ok"),
+        Err(e) => eprintln!("lunix-boot: mount /tmp failed: {e}"),
+    }
 }
 
 fn run_core_forever() {
-    // TODO: fork/exec lunix-core, reap it with waitpid, loop.
-    // As PID 1, this process is also responsible for reaping ALL
+    // todo: fork/exec lunix-core, reap it with waitpid, loop.
+    // as pid 1, this process is also responsible for reaping all
     // orphaned zombie processes system-wide, not just lunix-core's
-    // direct children — that's part of what makes PID 1 different from
-    // an ordinary process. Handle SIGCHLD accordingly once this is real.
-    println!("lunix-boot: TODO exec lunix-core, restart on exit");
+    // direct children — that's part of what makes pid 1 different from
+    // an ordinary process. handle sigchld accordingly once this is real.
+    println!("lunix-boot: todo exec lunix-core, restart on exit");
+
+    if (unsafe { signal(SIGCHLD, SIG_IGN) } == SIG_ERR) {
+        perror("signal");
+        exit(EXIT_FAILURE);
+    }
+    fork()
 }
