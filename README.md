@@ -17,12 +17,12 @@ lunix-site/
 
 ## before you push this live
 
-search for `YOURNAME` across the html files and replace with your
+search for `frgmntedflower` across the html files and replace with your
 actual github username/repo path. every github link is a placeholder
 right now.
 
 ```sh
-grep -rl YOURNAME . | xargs sed -i 's/YOURNAME/actual-username/g'
+grep -rl frgmntedflower . | xargs sed -i 's/frgmntedflower/actual-username/g'
 ```
 
 ## deploying to github pages
