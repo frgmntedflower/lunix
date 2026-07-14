@@ -1,1 +1,5 @@
 target
+iso/output
+iso/work
+iso/iso-root
+iso/rootfs

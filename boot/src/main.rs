@@ -10,13 +10,11 @@
 //! this file stays small on purpose. every line here runs before anything
 //! else on the machine can. boring and correct beats clever every time.
 
-use std::process::exit;
+use exec::Command;
+use fork::{fork, waitpid, Fork};
+use nix::mount::{mount, MsFlags};
 
-use nix::{
-    libc::{perror, EXIT_FAILURE, SIGCHLD, SIG_ERR, SIG_IGN},
-    mount::{mount, MsFlags},
-    sys::signal::signal,
-};
+const LUNIX_CORE_BIN_PATH: &str = "/usr/local/bin/lunix-core";
 
 fn main() {
     println!("lunix-boot: starting as pid {}", std::process::id());
@@ -52,9 +50,9 @@ fn mount_essential_filesystems() {
     }
 
     let result_sys = mount(
-        Some("sys"),
+        Some("sysfs"),
         "/sys",
-        Some("sys"),
+        Some("sysfs"),
         MsFlags::empty(),
         None::<&str>,
     );
@@ -65,9 +63,9 @@ fn mount_essential_filesystems() {
     }
 
     let result_dev = mount(
-        Some("dev"),
+        Some("devtmpfs"),
         "/dev",
-        Some("dev"),
+        Some("devtmpfs"),
         MsFlags::empty(),
         None::<&str>,
     );
@@ -78,9 +76,9 @@ fn mount_essential_filesystems() {
     }
 
     let result_tmp = mount(
-        Some("tmp"),
+        Some("tmpfs"),
         "/tmp",
-        Some("tmp"),
+        Some("tmpfs"),
         MsFlags::empty(),
         None::<&str>,
     );
@@ -97,11 +95,22 @@ fn run_core_forever() {
     // orphaned zombie processes system-wide, not just lunix-core's
     // direct children — that's part of what makes pid 1 different from
     // an ordinary process. handle sigchld accordingly once this is real.
-    println!("lunix-boot: todo exec lunix-core, restart on exit");
-
-    if (unsafe { signal(SIGCHLD, SIG_IGN) } == SIG_ERR) {
-        perror("signal");
-        exit(EXIT_FAILURE);
+    loop {
+        match fork() {
+            Ok(Fork::Parent(child_pid)) => {
+                println!("lunix-boot: forked child with pid {child_pid}");
+                match waitpid(child_pid) {
+                    Ok(status) => println!("Child exited with status: {status}"),
+                    Err(err) => println!("Child failed with error: {err}"),
+                }
+            }
+            Ok(Fork::Child) => {
+                let err = Command::new(LUNIX_CORE_BIN_PATH).exec();
+                println!("Error: {}", err);
+            }
+            Err(e) => {
+                eprintln!("lunix-boot: fork failed: {e}");
+            }
+        }
     }
-    fork()
 }

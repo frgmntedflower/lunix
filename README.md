@@ -66,6 +66,11 @@ boot and core: rust. modules: c by default, go for
 networking/security tools, asm inside a module where it earns its
 place. never asm as a whole module.
 
+## Prereq
+```sh
+sudo apt install debootstrap squashfs-tools grub-pc-bin grub-efi-amd64-bin xorriso busybox-static
+```
+
 ## building
 
 boot and core are separate crates in one cargo workspace:

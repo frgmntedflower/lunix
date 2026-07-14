@@ -1,0 +1,61 @@
+#!/bin/busybox sh
+/bin/busybox mount -t proc proc /proc
+/bin/busybox mount -t sysfs sysfs /sys
+/bin/busybox mount -t devtmpfs devtmpfs /dev
+
+echo "stage1: loading storage drivers..."
+/bin/busybox insmod /lib/modules/scsi_common.ko
+/bin/busybox insmod /lib/modules/scsi_mod.ko
+/bin/busybox insmod /lib/modules/libata.ko
+/bin/busybox insmod /lib/modules/cdrom.ko
+/bin/busybox insmod /lib/modules/ata_piix.ko
+/bin/busybox insmod /lib/modules/sr_mod.ko
+/bin/busybox insmod /lib/modules/isofs.ko
+/bin/busybox insmod /lib/modules/loop.ko
+/bin/busybox insmod /lib/modules/squashfs.ko
+echo "stage1: drivers loaded"
+
+mkdir -p /mnt/cdrom /mnt/root
+FOUND=""
+
+for dev in /dev/sr0 /dev/sr1 /dev/sda1 /dev/sdb1 /dev/vda1 /dev/vdb1; do
+    if [ -b "$dev" ]; then
+        /bin/busybox mount -t iso9660 -o ro "$dev" /mnt/cdrom 2>/dev/null
+        if [ -f /mnt/cdrom/live/filesystem.squashfs ]; then
+            FOUND="$dev"
+            break
+        fi
+        /bin/busybox umount /mnt/cdrom 2>/dev/null
+    fi
+done
+
+if [ -z "$FOUND" ]; then
+    echo "stage1: could not find filesystem.squashfs, dropping to shell"
+    exec /bin/busybox sh
+fi
+
+echo "stage1: found squashfs on $FOUND"
+
+# devtmpfs doesn't reliably have /dev/loop-control or /dev/loop0 ready
+# by the time we need them here, create them explicitly instead of
+# trusting mount's automatic "-o loop" device-node handling.
+[ -e /dev/loop-control ] || /bin/busybox mknod -m 660 /dev/loop-control c 10 237
+[ -e /dev/loop0 ] || /bin/busybox mknod -m 660 /dev/loop0 b 7 0
+
+/bin/busybox losetup /dev/loop0 /mnt/cdrom/live/filesystem.squashfs
+/bin/busybox mount -t squashfs -o ro /dev/loop0 /mnt/root
+
+# safety check: switch_root will panic pid 1 if /mnt/root isn't a real
+# mountpoint. this busybox build has no "mountpoint" applet, so check
+# /proc/mounts directly instead, which is always available.
+if ! grep -q ' /mnt/root ' /proc/mounts; then
+    echo "stage1: squashfs mount failed, dropping to shell"
+    exec /bin/busybox sh
+fi
+
+mkdir -p /mnt/root/proc /mnt/root/sys /mnt/root/dev
+/bin/busybox mount -o move /proc /mnt/root/proc
+/bin/busybox mount -o move /sys /mnt/root/sys
+/bin/busybox mount -o move /dev /mnt/root/dev
+
+exec /bin/busybox switch_root /mnt/root /sbin/init
