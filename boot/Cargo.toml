@@ -1,0 +1,12 @@
+[package]
+name = "lunix-boot"
+version = "0.1.0"
+edition = "2021"
+description = "minimal PID 1 init for the Lunix ecosystem"
+
+[[bin]]
+name = "lunix-boot"
+path = "src/main.rs"
+
+[dependencies]
+nix = { version = "0.29", features = ["mount", "process", "signal"] }
